@@ -1,0 +1,330 @@
+
+/* =========================================
+   FOODIEGO - RESTAURANT CARD
+========================================= */
+
+.restaurant-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #f0e7df;
+  border-radius: 20px;
+  box-shadow: 0 5px 22px rgba(47, 31, 20, 0.06);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.restaurant-card:hover {
+  transform: translateY(-5px);
+  border-color: #ffd5b8;
+  box-shadow: 0 16px 38px rgba(47, 31, 20, 0.12);
+}
+
+/* =========================================
+   RESTAURANT IMAGE
+========================================= */
+
+.restaurant-card-image {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fff0e3, #ffe0c5);
+}
+
+.restaurant-card-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.4s ease;
+}
+
+.restaurant-card:hover .restaurant-card-image img {
+  transform: scale(1.05);
+}
+
+.restaurant-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 60px;
+}
+
+/* =========================================
+   OPEN NOW / CLOSED BADGE
+========================================= */
+
+.restaurant-status {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  left: auto;
+  bottom: auto;
+  z-index: 5;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  width: fit-content;
+  min-height: 0;
+  padding: 7px 10px;
+  margin: 0;
+
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  transition: box-shadow 0.2s ease;
+}
+
+/* Open */
+
+.restaurant-status.open {
+  color: #167346;
+  background: rgba(237, 255, 244, 0.97);
+  border: 1px solid #c4efd4;
+}
+
+.restaurant-status.open::before {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #22b568;
+}
+
+/* Closed */
+
+.restaurant-status.closed {
+  color: #a83232;
+  background: rgba(255, 241, 241, 0.97);
+  border: 1px solid #f2cccc;
+}
+
+.restaurant-status.closed::before {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #e05252;
+}
+
+/* =========================================
+   CARD CONTENT
+========================================= */
+
+.restaurant-card-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding: 20px;
+}
+
+.restaurant-card-content h3 {
+  margin: 0 0 9px;
+  color: #29211c;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* Description */
+
+.restaurant-description {
+  display: -webkit-box;
+  min-height: 44px;
+  margin: 0 0 16px;
+  overflow: hidden;
+  color: #81756d;
+  font-size: 13px;
+  line-height: 1.7;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* =========================================
+   DELIVERY DETAILS
+========================================= */
+
+.restaurant-card-details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 15px;
+  margin-bottom: 15px;
+  color: #65584f;
+  font-size: 12px;
+}
+
+.restaurant-card-details span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.restaurant-card-details svg {
+  flex-shrink: 0;
+  color: #f47721;
+  font-size: 15px;
+}
+
+/* =========================================
+   CUISINES
+========================================= */
+
+.restaurant-cuisines {
+  margin-top: auto;
+  margin-bottom: 17px;
+  color: #dc681f;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+/* =========================================
+   VIEW RESTAURANT BUTTON
+========================================= */
+
+.restaurant-view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  width: 100%;
+  min-height: 45px;
+  margin-top: auto;
+  padding: 12px 15px;
+
+  color: #ffffff;
+  background: #f47721;
+  border: 1px solid #f47721;
+  border-radius: 11px;
+
+  text-align: center;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.restaurant-view-btn:hover {
+  color: #ffffff;
+  background: #db610e;
+  border-color: #db610e;
+  box-shadow: 0 5px 14px rgba(244, 119, 33, 0.2);
+}
+
+.restaurant-view-btn:focus-visible {
+  outline: 3px solid rgba(244, 119, 33, 0.35);
+  outline-offset: 3px;
+}
+
+.restaurant-view-btn svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.restaurant-view-btn:hover svg {
+  transform: translateX(3px);
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 1000px) {
+  .restaurant-card-image {
+    height: 200px;
+  }
+
+  .restaurant-card-content {
+    padding: 18px;
+  }
+
+  .restaurant-card-content h3 {
+    font-size: 19px;
+  }
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+  .restaurant-card {
+    border-radius: 17px;
+  }
+
+  .restaurant-card-image {
+    height: 215px;
+  }
+
+  .restaurant-card-content {
+    padding: 18px;
+  }
+
+  .restaurant-card-content h3 {
+    font-size: 20px;
+  }
+
+  .restaurant-status {
+    top: 10px;
+    right: 10px;
+    left: auto;
+    padding: 6px 9px;
+    font-size: 10px;
+  }
+
+  .restaurant-card-details {
+    gap: 10px 13px;
+  }
+}
+
+/* =========================================
+   ACCESSIBILITY
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .restaurant-card,
+  .restaurant-card-image img,
+  .restaurant-view-btn,
+  .restaurant-view-btn svg {
+    transition: none;
+  }
+
+  .restaurant-card:hover,
+  .restaurant-card:hover .restaurant-card-image img {
+    transform: none;
+  }
+}

@@ -81,11 +81,12 @@ const getRestaurants = async (req, res) => {
   try {
     const restaurants = await Restaurant.find({
       isActive: true,
-      isApproved: true,
+      isOpen: true,
     })
       .populate("owner", "name email phone")
       .sort({ createdAt: -1 });
-
+    console.log(restaurants);
+    
     res.status(200).json({
       success: true,
       count: restaurants.length,
