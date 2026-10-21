@@ -39,7 +39,8 @@ function RestaurantDetails() {
 
         const restaurantData = restaurantResponse.data;
         const foodData = foodResponse.data;
-
+         console.log("Restaurant API response:", restaurantData);
+        console.log("Food API response:", foodData);
         const restaurantResult =
           restaurantData.restaurant ??
           restaurantData.data?.restaurant ??
@@ -128,15 +129,32 @@ function RestaurantDetails() {
           return categoryName === activeCategory;
         });
 
-  const getImageUrl = (image) => {
-    if (!image) return "";
+ const getImageUrl = (image) => {
+  if (!image || typeof image !== "string") return "";
 
-    if (image.startsWith("http")) return image;
+  const imagePath = image.trim();
 
-    const baseURL = api.defaults.baseURL.replace(/\/api\/?$/, "");
+  if (!imagePath) return "";
 
-    return `${baseURL}${image.startsWith("/") ? image : `/${image}`}`;
-  };
+  // Cloudinary or another external image URL
+  if (/^https?:\/\//i.test(imagePath)) {
+    return imagePath;
+  }
+
+  // Get the deployed backend URL from Axios
+  const apiBaseURL = api.defaults.baseURL;
+
+  if (!apiBaseURL) {
+    console.error("API baseURL is not configured");
+    return "";
+  }
+
+  const serverURL = apiBaseURL
+    .replace(/\/api\/?$/, "")
+    .replace(/\/+$/, "");
+
+  return `${serverURL}/${imagePath.replace(/^\/+/, "")}`;
+};
 
   const handleAddToCart = async (food) => {
     setActionMessage("");
@@ -238,6 +256,7 @@ function RestaurantDetails() {
               src={getImageUrl(restaurant.image)}
               alt={restaurant.name}
             />
+
           ) : (
             <div className="restaurant-details-image-placeholder">
               🍽️

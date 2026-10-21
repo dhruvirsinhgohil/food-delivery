@@ -41,9 +41,14 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const path = require("path");
 
-// Static uploads
-app.use("/uploads", express.static("uploads"));
+// Serve uploaded food and restaurant images
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"))
+);
+
 
 // ===============================
 // API ROUTES
