@@ -1,6 +1,6 @@
 const Food = require("../models/Food");
 const Restaurant = require("../models/Restaurant");
-
+const mongoose = require("mongoose");
 // =====================================
 // CREATE FOOD
 // =====================================
@@ -20,19 +20,20 @@ const createFood = async (req, res) => {
     } = req.body;
 
     // Check restaurant ownership
-    const restaurantData = await Restaurant.findOne({
-      _id: restaurant,
-      owner: req.user.userId,
-    });
+    const restaurantQuery = { _id: restaurant };
+    if (req.user.role !== "admin") {
+      restaurantQuery.owner = req.user.userId;
+    }
+    const restaurantData = await Restaurant.findOne(restaurantQuery);
 
     if (!restaurantData) {
       return res.status(403).json({
         success: false,
-        message: "You can only add food to your own restaurant",
+        message: "You can only add food to a restaurant you manage",
       });
     }
 
-    let image = "";
+    let image = req.body.image || "";
 
     if (req.file) {
       image = `/uploads/foods/${req.file.filename}`;
@@ -68,43 +69,118 @@ const createFood = async (req, res) => {
 // GET FOODS
 // =====================================
 
+// const getFoods = async (req, res) => {
+//   try {
+//     const { restaurant, category, foodType } = req.query;
+
+//     const filter = {
+//       isAvailable: true,
+//     };
+
+//     if (restaurant) {
+//       filter.restaurant = restaurant;
+//     }
+
+//     if (category) {
+//       filter.category = category;
+//     }
+
+//     if (foodType) {
+//       filter.foodType = foodType;
+//     }
+
+//     const foods = await Food.find(filter)
+//       .populate("restaurant", "name image rating")
+//       .populate("category", "name image")
+//       .sort({ createdAt: -1 });
+
+//     res.status(200).json({
+//       success: true,
+//       count: foods.length,
+//       foods,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+
+// =====================================
+// GET FOODS (RESTAURANT-WISE)
+// =====================================
+
+
 const getFoods = async (req, res) => {
   try {
-    const { restaurant, category, foodType } = req.query;
+    const { restaurant, category, foodType, includeUnavailable } = req.query;
 
-    const filter = {
-      isAvailable: true,
-    };
+    const filter = {};
 
+    if (includeUnavailable !== "true") {
+      filter.isAvailable = { $ne: false };
+    }
+
+    // Filter foods by restaurant ID
     if (restaurant) {
-      filter.restaurant = restaurant;
+      if (!mongoose.Types.ObjectId.isValid(restaurant)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid restaurant ID",
+        });
+      }
+
+      filter.restaurant = new mongoose.Types.ObjectId(restaurant);
     }
 
+    // Filter by category ID
     if (category) {
-      filter.category = category;
+      if (!mongoose.Types.ObjectId.isValid(category)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid category ID",
+        });
+      }
+
+      filter.category = new mongoose.Types.ObjectId(category);
     }
 
+    // Filter by food type: veg, non-veg, vegan
     if (foodType) {
+      if (!["veg", "non-veg", "vegan"].includes(foodType)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid food type",
+        });
+      }
+
       filter.foodType = foodType;
     }
 
     const foods = await Food.find(filter)
-      .populate("restaurant", "name image rating")
+      .populate("restaurant", "name image rating isOpen isActive")
       .populate("category", "name image")
       .sort({ createdAt: -1 });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: foods.length,
       foods,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Get foods error:", error);
+
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to fetch foods",
+      error: error.message,
     });
   }
 };
+
+
 
 // =====================================
 // GET SINGLE FOOD
@@ -113,7 +189,7 @@ const getFoods = async (req, res) => {
 const getFoodById = async (req, res) => {
   try {
     const food = await Food.findById(req.params.id)
-      .populate("restaurant", "name image rating")
+      .populate("restaurant", "name image rating isOpen isActive")
       .populate("category", "name image");
 
     if (!food) {
@@ -151,15 +227,16 @@ const updateFood = async (req, res) => {
     }
 
     // Check restaurant ownership
-    const restaurant = await Restaurant.findOne({
-      _id: food.restaurant,
-      owner: req.user.userId,
-    });
+    const restaurantQuery = { _id: food.restaurant };
+    if (req.user.role !== "admin") {
+      restaurantQuery.owner = req.user.userId;
+    }
+    const restaurant = await Restaurant.findOne(restaurantQuery);
 
     if (!restaurant) {
       return res.status(403).json({
         success: false,
-        message: "You can only update your own food",
+        message: "You can only update food for a restaurant you manage",
       });
     }
 
@@ -182,6 +259,7 @@ const updateFood = async (req, res) => {
     if (ingredients !== undefined) food.ingredients = ingredients;
     if (isAvailable !== undefined) food.isAvailable = isAvailable;
     if (category !== undefined) food.category = category;
+    if (req.body.image !== undefined) food.image = req.body.image;
 
     if (req.file) {
       food.image = `/uploads/foods/${req.file.filename}`;
@@ -217,15 +295,16 @@ const deleteFood = async (req, res) => {
       });
     }
 
-    const restaurant = await Restaurant.findOne({
-      _id: food.restaurant,
-      owner: req.user.userId,
-    });
+    const restaurantQuery = { _id: food.restaurant };
+    if (req.user.role !== "admin") {
+      restaurantQuery.owner = req.user.userId;
+    }
+    const restaurant = await Restaurant.findOne(restaurantQuery);
 
     if (!restaurant) {
       return res.status(403).json({
         success: false,
-        message: "You can only delete your own food",
+        message: "You can only delete food for a restaurant you manage",
       });
     }
 

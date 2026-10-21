@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import {
   FiMenu,
@@ -15,9 +15,12 @@ import {
   FiArrowRight,
   FiUser,
   FiChevronRight,
+  FiLogOut,
 } from "react-icons/fi";
 
 import "../../styles/Navbar.css";
+import { useAuth } from "../../context/useAuth";
+import { useCart } from "../../context/useCart";
 
 const navItems = [
   { name: "Home", path: "/", icon: FiHome },
@@ -31,13 +34,9 @@ function Navbar() {
   const [search, setSearch] = useState("");
   const [locationText, setLocationText] = useState("Your Location");
 
-  const location = useLocation();
   const navigate = useNavigate();
-
-  // Close the drawer when the route changes.
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location.pathname]);
+  const { user, isAuthenticated, signOut } = useAuth();
+  const { totalItems } = useCart();
 
   // Prevent the page from scrolling behind the drawer.
   useEffect(() => {
@@ -72,8 +71,8 @@ function Navbar() {
 
     navigate(
       query
-        ? `/restaurants?search=${encodeURIComponent(query)}`
-        : "/restaurants"
+        ? `/foods?search=${encodeURIComponent(query)}`
+        : "/foods"
     );
 
     setMenuOpen(false);
@@ -272,14 +271,15 @@ function Navbar() {
                 aria-label="Shopping cart"
               >
                 <FiShoppingCart size={21} />
+                {totalItems > 0 && <span className="navbar-count">{totalItems > 99 ? "99+" : totalItems}</span>}
               </Link>
             </motion.div>
 
             <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.92 }}>
               <Link
-                to="/login"
+                to={isAuthenticated ? "/account" : "/login"}
                 className="account-action"
-                aria-label="Login"
+                aria-label={isAuthenticated ? "My account" : "Login"}
               >
                 <FiUser size={21} />
               </Link>
@@ -377,7 +377,7 @@ function Navbar() {
 
               {/* Guest profile */}
               <Link
-                to="/login"
+                to={isAuthenticated ? "/account" : "/login"}
                 className="mobile-profile"
                 onClick={closeMenu}
               >
@@ -386,8 +386,8 @@ function Navbar() {
                 </span>
 
                 <span className="profile-copy">
-                  <strong>Welcome to FoodieGo</strong>
-                  <small>Login to manage your orders</small>
+                  <strong>{isAuthenticated ? `Hello, ${user?.name || "food lover"}` : "Welcome to FoodieGo"}</strong>
+                  <small>{isAuthenticated ? "Manage your account and orders" : "Login to manage your orders"}</small>
                 </span>
 
                 <FiChevronRight size={21} />
@@ -478,6 +478,11 @@ function Navbar() {
 
               {/* Authentication buttons */}
               <div className="mobile-auth-actions">
+                {isAuthenticated ? (
+                  <button type="button" className="mobile-login-button" onClick={() => { signOut(); closeMenu(); navigate("/"); }}>
+                    <FiLogOut /> Sign out
+                  </button>
+                ) : <>
                 <Link
                   to="/login"
                   className="mobile-login-button"
@@ -493,6 +498,7 @@ function Navbar() {
                 >
                   Create Account <FiArrowRight size={18} />
                 </Link>
+                </>}
               </div>
 
               <p className="mobile-menu-footer">

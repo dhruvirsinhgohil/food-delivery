@@ -3,6 +3,7 @@ const express = require("express");
 const {
   createDeliveryPartner,
   getDeliveryPartners,
+  updateDeliveryPartnerStatus,
 } = require("../controllers/deliveryPartnercontroller");
 
 const {
@@ -26,6 +27,13 @@ router.get(
   protect,
   authorize("admin"),
   getDeliveryPartners
+);
+
+router.patch(
+  "/:id/status",
+  protect,
+  authorize("admin"),
+  updateDeliveryPartnerStatus
 );
 
 module.exports = router;

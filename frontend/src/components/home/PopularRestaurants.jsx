@@ -9,11 +9,8 @@ import {
   FiStar,
   FiTruck,
 } from "react-icons/fi";
-import axios from "axios";
-
+import api from "../../api/axios";
 import "../../styles/PopularRestaurants.css";
-
-const API_URL = "http://localhost:5000/api";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 25 },
@@ -31,7 +28,7 @@ function getRestaurantImage(restaurant) {
     return restaurant.image;
   }
 
-  return `http://localhost:5000${
+  return `${api.defaults.baseURL.replace(/\/api\/?$/, "")}${
     restaurant.image.startsWith("/") ? "" : "/"
   }${restaurant.image}`;
 }
@@ -54,10 +51,7 @@ function PopularRestaurants() {
 
   const fetchRestaurants = async () => {
     try {
-      setLoading(true);
-      setError("");
-
-      const response = await axios.get(`${API_URL}/restaurants`);
+      const response = await api.get("/restaurants");
 
       // Supports APIs returning an array directly or inside data/restaurants.
       const payload = response.data;
@@ -83,7 +77,7 @@ function PopularRestaurants() {
   };
 
   useEffect(() => {
-    fetchRestaurants();
+    Promise.resolve().then(fetchRestaurants);
   }, []);
 
   return (

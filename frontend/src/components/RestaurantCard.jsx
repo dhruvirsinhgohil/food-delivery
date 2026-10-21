@@ -7,6 +7,12 @@ function RestaurantCard({ restaurant }) {
       ? restaurant.image
       : `http://localhost:5000${restaurant.image}`
     : null;
+  const address = restaurant.address;
+  const location =
+    typeof address === "string"
+      ? address
+      : [address?.city, address?.state].filter(Boolean).join(", ") ||
+        "Location available";
 
   return (
     <div className="restaurant-card">
@@ -41,9 +47,7 @@ function RestaurantCard({ restaurant }) {
 
           <span>
             <FiMapPin />
-            {restaurant.address?.city ||
-              restaurant.address ||
-              "Location available"}
+            {location}
           </span>
         </div>
 

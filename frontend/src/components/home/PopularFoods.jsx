@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import {
   FiShoppingCart,
@@ -10,10 +10,10 @@ import {
   FiHeart,
 } from "react-icons/fi";
 import Swal from "sweetalert2";
-import axios from "axios";
+import api from "../../api/axios";
+import { useCart } from "../../context/useCart";
+import { useAuth } from "../../context/useAuth";
 import "../../styles/PopularFoods.css";
-
-const API_URL = "http://localhost:5000/api";
 
 function getImageUrl(image) {
   if (!image) return "";
@@ -22,7 +22,7 @@ function getImageUrl(image) {
     return image;
   }
 
-  return `http://localhost:5000${
+  return `${api.defaults.baseURL.replace(/\/api\/?$/, "")}${
     image.startsWith("/") ? image : `/${image}`
   }`;
 }
@@ -32,13 +32,13 @@ function PopularFoods() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [favorites, setFavorites] = useState([]);
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const fetchFoods = async () => {
     try {
-      setLoading(true);
-      setError("");
-
-      const response = await axios.get(`${API_URL}/foods`);
+      const response = await api.get("/foods");
       const payload = response.data;
 
       let foodList = [];
@@ -67,26 +67,58 @@ function PopularFoods() {
   };
 
   useEffect(() => {
-    fetchFoods();
+    Promise.resolve().then(fetchFoods);
   }, []);
 
-  const toggleFavorite = (foodId) => {
-    setFavorites((previous) =>
-      previous.includes(foodId)
-        ? previous.filter((id) => id !== foodId)
-        : [...previous, foodId]
-    );
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    api.get("/wishlist")
+      .then(({ data }) => setFavorites((data.wishlist?.foods || []).map((food) => food._id)))
+      .catch((requestError) => console.error("Unable to load wishlist:", requestError.response?.data || requestError.message));
+  }, [isAuthenticated]);
+
+  const toggleFavorite = async (food) => {
+    const foodId = getFoodId(food);
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: "/" } });
+      return;
+    }
+    try {
+      if (favorites.includes(foodId)) {
+        await api.delete(`/wishlist/${foodId}`);
+        setFavorites((current) => current.filter((id) => id !== foodId));
+      } else {
+        await api.post("/wishlist", { foodId });
+        setFavorites((current) => [...current, foodId]);
+      }
+    } catch (requestError) {
+      await Swal.fire({
+        icon: "error",
+        title: "Wishlist update failed",
+        text: requestError.response?.data?.message || "Please try again.",
+        confirmButtonColor: "#f97316",
+      });
+    }
   };
 
   const handleAddToCart = async (food) => {
-    // Cart persistence will be connected to your backend in the cart step.
-    await Swal.fire({
-      icon: "info",
-      title: "Food selected!",
-      text: `${food.name} is ready to be connected to your cart.`,
-      confirmButtonText: "Continue",
-      confirmButtonColor: "#f97316",
-    });
+    try {
+      await addToCart(food);
+      await Swal.fire({
+        icon: "success",
+        title: "Added to your cart",
+        text: `${food.name} is ready for checkout.`,
+        confirmButtonText: "Continue",
+        confirmButtonColor: "#f97316",
+      });
+    } catch (requestError) {
+      await Swal.fire({
+        icon: "error",
+        title: "Could not add this food",
+        text: requestError.response?.data?.message || requestError.message,
+        confirmButtonColor: "#f97316",
+      });
+    }
   };
 
   const getFoodId = (food) => food._id || food.id;
@@ -178,6 +210,7 @@ function PopularFoods() {
                         loading="lazy"
                         onError={(event) => {
                           event.currentTarget.style.display = "none";
+                          event.currentTarget.parentElement.classList.add("image-failed");
                         }}
                       />
                     ) : (
@@ -195,7 +228,7 @@ function PopularFoods() {
                       className={`food-favorite-button ${
                         isFavorite ? "active" : ""
                       }`}
-                      onClick={() => toggleFavorite(foodId)}
+                      onClick={() => toggleFavorite(food)}
                       aria-label={
                         isFavorite
                           ? "Remove from favorites"
@@ -242,17 +275,20 @@ function PopularFoods() {
                     <div className="popular-food-bottom">
                       <div className="popular-food-price">
                         <span>₹</span>
-                        {Number(food.price || 0).toFixed(0)}
+                        {(
+                          Number(food.price || 0) *
+                          (1 - Number(food.discount || 0) / 100)
+                        ).toFixed(0)}
                       </div>
 
                       <button
                         type="button"
                         className="food-add-button"
                         onClick={() => handleAddToCart(food)}
-                        disabled={food.isAvailable === false}
+                        disabled={food.isAvailable === false || food.restaurant?.isOpen === false || food.restaurant?.isActive === false}
                       >
                         <FiShoppingCart />
-                        Add
+                        {food.restaurant?.isOpen === false ? "Closed" : "Add"}
                       </button>
                     </div>
                   </div>

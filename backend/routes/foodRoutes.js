@@ -25,7 +25,7 @@ router.get("/:id", getFoodById);
 router.post(
   "/",
   protect,
-  authorize("restaurant"),
+  authorize("restaurant", "admin"),
   upload.single("image"),
   createFood
 );
@@ -33,7 +33,7 @@ router.post(
 router.put(
   "/:id",
   protect,
-  authorize("restaurant"),
+  authorize("restaurant", "admin"),
   upload.single("image"),
   updateFood
 );
@@ -41,7 +41,7 @@ router.put(
 router.delete(
   "/:id",
   protect,
-  authorize("restaurant"),
+  authorize("restaurant", "admin"),
   deleteFood
 );
 

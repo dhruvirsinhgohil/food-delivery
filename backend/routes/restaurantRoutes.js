@@ -3,11 +3,14 @@ const express = require("express");
 const {
   createRestaurant,
   getRestaurants,
+  getAdminRestaurants,
   getRestaurantById,
   getMyRestaurant,
   updateRestaurant,
+  updateRestaurantAdmin,
   deleteRestaurant,
   approveRestaurant,
+  updateRestaurantAdminStatus,
 } = require("../controllers/restaurantController");
 
 const {
@@ -24,6 +27,13 @@ const router = express.Router();
 // =====================================
 
 router.get("/", getRestaurants);
+
+router.get(
+  "/admin/all",
+  protect,
+  authorize("admin"),
+  getAdminRestaurants
+);
 
 // IMPORTANT: before /:id
 router.get(
@@ -66,11 +76,26 @@ router.delete(
 // ADMIN
 // =====================================
 
+router.put(
+  "/:id/admin",
+  protect,
+  authorize("admin"),
+  upload.single("image"),
+  updateRestaurantAdmin
+);
+
 router.patch(
   "/:id/approve",
   protect,
   authorize("admin"),
   approveRestaurant
+);
+
+router.patch(
+  "/:id/status",
+  protect,
+  authorize("admin"),
+  updateRestaurantAdminStatus
 );
 
 module.exports = router;

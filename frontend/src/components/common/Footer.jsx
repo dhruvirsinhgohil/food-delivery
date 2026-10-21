@@ -138,6 +138,7 @@ function Footer() {
           <div className="footer-links-column">
             <h3>Explore</h3>
             <Link to="/">Home</Link>
+            <Link to="/foods">Browse Food</Link>
             <Link to="/restaurants">Restaurants</Link>
             <Link to="/orders">My Orders</Link>
             <Link to="/wishlist">My Wishlist</Link>
@@ -148,7 +149,7 @@ function Footer() {
             <h3>Account</h3>
             <Link to="/login">Login</Link>
             <Link to="/register">Create Account</Link>
-            <Link to="/profile">My Profile</Link>
+            <Link to="/account">My Profile</Link>
             <Link to="/orders">Order History</Link>
           </div>
 

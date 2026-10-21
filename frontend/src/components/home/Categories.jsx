@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -8,89 +8,45 @@ import {
 } from "react-icons/fi";
 
 import "../../styles/Categories.css";
+import api from "../../api/axios";
 
-const categories = [
-  {
-    id: "all",
-    name: "All Foods",
-    emoji: "🍽️",
-    description: "Explore everything",
-    color: "#fff0df",
-    accent: "#f97316",
-  },
-  {
-    id: "pizza",
-    name: "Pizza",
-    emoji: "🍕",
-    description: "Cheesy & delicious",
-    color: "#ffeddf",
-    accent: "#ea580c",
-  },
-  {
-    id: "burger",
-    name: "Burgers",
-    emoji: "🍔",
-    description: "Juicy & satisfying",
-    color: "#fff0d9",
-    accent: "#d97706",
-  },
-  {
-    id: "indian",
-    name: "Indian",
-    emoji: "🍛",
-    description: "Authentic flavors",
-    color: "#ffe8df",
-    accent: "#e85d04",
-  },
-  {
-    id: "biryani",
-    name: "Biryani",
-    emoji: "🍚",
-    description: "Aromatic favorites",
-    color: "#fff0d7",
-    accent: "#ca8a04",
-  },
-  {
-    id: "desserts",
-    name: "Desserts",
-    emoji: "🍰",
-    description: "Sweet little treats",
-    color: "#ffe8f0",
-    accent: "#e64980",
-  },
-  {
-    id: "drinks",
-    name: "Drinks",
-    emoji: "🥤",
-    description: "Cool & refreshing",
-    color: "#e4f4ff",
-    accent: "#0284c7",
-  },
-  {
-    id: "healthy",
-    name: "Healthy",
-    emoji: "🥗",
-    description: "Fresh & balanced",
-    color: "#e6f7e8",
-    accent: "#16a34a",
-  },
+const palettes = [
+  ["#fff0df", "#f97316", "🍽️"],
+  ["#ffeddf", "#ea580c", "🍕"],
+  ["#fff0d9", "#d97706", "🍔"],
+  ["#ffe8df", "#e85d04", "🍛"],
+  ["#fff0d7", "#ca8a04", "🍚"],
+  ["#ffe8f0", "#e64980", "🍰"],
+  ["#e4f4ff", "#0284c7", "🥤"],
+  ["#e6f7e8", "#16a34a", "🥗"],
 ];
 
 function Categories() {
   const [activeCategory, setActiveCategory] = useState("all");
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
 
-  const handleCategoryClick = (category) => {
-    setActiveCategory(category.id);
+  useEffect(() => {
+    api.get("/categories")
+      .then(({ data }) => setCategories(data.categories || []))
+      .catch((error) => console.error("Unable to load food categories:", error.response?.data || error.message));
+  }, []);
 
-    if (category.id === "all") {
-      navigate("/restaurants");
+  const handleCategoryClick = (category) => {
+    setActiveCategory(category._id);
+    if (category._id === "all") {
+      navigate("/foods");
     } else {
-      navigate(
-        `/restaurants?category=${encodeURIComponent(category.id)}`
-      );
+      navigate(`/foods?category=${encodeURIComponent(category._id)}`);
     }
   };
+  const visibleCategories = [
+    { _id: "all", name: "All Foods", description: "Explore everything" },
+    ...categories,
+  ].map((category, index) => {
+    const [color, accent, emoji] = palettes[index % palettes.length];
+    return { ...category, color, accent, emoji };
+  });
 
   return (
     <section className="categories-section">
@@ -124,7 +80,7 @@ function Categories() {
           <motion.button
             type="button"
             className="categories-view-all"
-            onClick={() => navigate("/restaurants")}
+            onClick={() => navigate("/foods")}
             whileHover={{ x: 4 }}
             whileTap={{ scale: 0.96 }}
           >
@@ -147,13 +103,13 @@ function Categories() {
             },
           }}
         >
-          {categories.map((category, index) => {
-            const isActive = activeCategory === category.id;
+          {visibleCategories.map((category, index) => {
+            const isActive = activeCategory === category._id;
 
             return (
               <motion.button
                 type="button"
-                key={category.id}
+                key={category._id}
                 className={`category-card ${
                   isActive ? "category-active" : ""
                 }`}
@@ -268,7 +224,7 @@ function Categories() {
 
           <button
             type="button"
-            onClick={() => navigate("/restaurants")}
+            onClick={() => navigate("/foods")}
           >
             Discover more <FiArrowRight size={15} />
           </button>

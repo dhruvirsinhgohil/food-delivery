@@ -5,3 +5,10 @@ node_modules/
 .env
 
 uploads/
+
+!backend/uploads/
+backend/uploads/*
+!backend/uploads/foods/
+backend/uploads/foods/*
+!backend/uploads/foods/demo-catalog/
+!backend/uploads/foods/demo-catalog/**

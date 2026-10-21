@@ -4,6 +4,7 @@ const Cart = require("../models/Cart");
 const Address = require("../models/Address");
 const Food = require("../models/Food");
 const Coupon = require("../models/Coupon");
+const Restaurant = require("../models/Restaurant");
 
 const generateOrderNumber = () => {
   return `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -13,6 +14,14 @@ const generateOrderNumber = () => {
 const createOrder = async (req, res) => {
   try {
     const { address, couponCode } = req.body;
+    const paymentMethod = req.body.paymentMethod || "cod";
+    const allowedPaymentMethods = ["cod", "upi", "card", "netbanking"];
+    if (!allowedPaymentMethods.includes(paymentMethod)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid payment method",
+      });
+    }
 
     // ================================
     // GET CART
@@ -55,6 +64,18 @@ const createOrder = async (req, res) => {
 
     const restaurantId =
       cart.items[0].food.restaurant.toString();
+
+    const restaurant = await Restaurant.findOne({
+      _id: restaurantId,
+      isActive: true,
+      isOpen: true,
+    });
+    if (!restaurant) {
+      return res.status(400).json({
+        success: false,
+        message: "This restaurant is currently not accepting orders",
+      });
+    }
 
     const differentRestaurant = cart.items.some(
       (item) =>
@@ -207,7 +228,7 @@ const createOrder = async (req, res) => {
       discount,
       totalAmount,
       coupon: coupon ? coupon._id : null,
-      paymentMethod: "cod",
+      paymentMethod,
       paymentStatus: "pending",
       orderStatus: "placed",
     });
@@ -428,7 +449,7 @@ const updateOrderStatus = async (req, res) => {
         orderStatus: status,
       },
       {
-        new: true,
+        returnDocument: "after",
       }
     );
 

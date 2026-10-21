@@ -2,19 +2,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
-import axios from "axios";
+import api from "../api/axios";
 import {
   FiSearch,
   FiMapPin,
-  FiClock,
   FiArrowRight,
   FiRefreshCw,
   FiSliders,
 } from "react-icons/fi";
 import RestaurantCard from "../components/RestaurantCard";
 import "../styles/Restaurants.css";
-
-const API_URL = "http://localhost:5000/api";
 
 function Restaurants() {
   const [restaurants, setRestaurants] = useState([]);
@@ -26,10 +23,7 @@ function Restaurants() {
 
   const fetchRestaurants = async () => {
     try {
-      setLoading(true);
-      setError("");
-
-      const response = await axios.get(`${API_URL}/restaurants`);
+      const response = await api.get("/restaurants");
       const payload = response.data;
 
       const restaurantList = Array.isArray(payload)
@@ -58,7 +52,7 @@ function Restaurants() {
   };
 
   useEffect(() => {
-    fetchRestaurants();
+    Promise.resolve().then(fetchRestaurants);
   }, []);
 
   const cuisines = useMemo(() => {

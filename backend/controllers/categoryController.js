@@ -62,6 +62,23 @@ const getCategories = async (req, res) => {
   }
 };
 
+const getAllCategories = async (req, res) => {
+  try {
+    const categories = await Category.find().sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: categories.length,
+      categories,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // GET CATEGORY
 const getCategoryById = async (req, res) => {
   try {
@@ -93,7 +110,7 @@ const updateCategory = async (req, res) => {
       req.params.id,
       req.body,
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       }
     );
@@ -127,7 +144,7 @@ const deleteCategory = async (req, res) => {
         isActive: false,
       },
       {
-        new: true,
+        returnDocument: "after",
       }
     );
 
@@ -153,6 +170,7 @@ const deleteCategory = async (req, res) => {
 module.exports = {
   createCategory,
   getCategories,
+  getAllCategories,
   getCategoryById,
   updateCategory,
   deleteCategory,

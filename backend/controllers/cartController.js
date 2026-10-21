@@ -1,5 +1,6 @@
 const Cart = require("../models/Cart");
 const Food = require("../models/Food");
+const Restaurant = require("../models/Restaurant");
 
 const calculateTotal = (items) => {
   return items.reduce(
@@ -8,12 +9,15 @@ const calculateTotal = (items) => {
   );
 };
 
+const getFoodPrice = (food) =>
+  Number((food.price * (1 - Number(food.discount || 0) / 100)).toFixed(2));
+
 // GET CART
 const getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({
       user: req.user.userId,
-    }).populate("items.food");
+    }).populate({ path: "items.food", populate: { path: "restaurant", select: "name" } });
 
     if (!cart) {
       return res.status(200).json({
@@ -58,6 +62,18 @@ const addToCart = async (req, res) => {
       });
     }
 
+    const restaurant = await Restaurant.findOne({
+      _id: food.restaurant,
+      isActive: true,
+      isOpen: true,
+    });
+    if (!restaurant) {
+      return res.status(400).json({
+        success: false,
+        message: "This restaurant is currently not accepting orders",
+      });
+    }
+
     let cart = await Cart.findOne({
       user: req.user.userId,
     });
@@ -69,10 +85,10 @@ const addToCart = async (req, res) => {
           {
             food: foodId,
             quantity,
-            price: food.price,
+            price: getFoodPrice(food),
           },
         ],
-        totalAmount: food.price * quantity,
+        totalAmount: getFoodPrice(food) * quantity,
       });
     } else {
       const existingItem = cart.items.find(
@@ -81,11 +97,12 @@ const addToCart = async (req, res) => {
 
       if (existingItem) {
         existingItem.quantity += Number(quantity);
+        existingItem.price = getFoodPrice(food);
       } else {
         cart.items.push({
           food: foodId,
           quantity,
-          price: food.price,
+          price: getFoodPrice(food),
         });
       }
 
@@ -94,7 +111,7 @@ const addToCart = async (req, res) => {
       await cart.save();
     }
 
-    await cart.populate("items.food");
+    await cart.populate({ path: "items.food", populate: { path: "restaurant", select: "name" } });
 
     res.status(200).json({
       success: true,
@@ -147,7 +164,7 @@ const updateCartItem = async (req, res) => {
     cart.totalAmount = calculateTotal(cart.items);
 
     await cart.save();
-    await cart.populate("items.food");
+    await cart.populate({ path: "items.food", populate: { path: "restaurant", select: "name" } });
 
     res.status(200).json({
       success: true,
@@ -183,7 +200,7 @@ const removeFromCart = async (req, res) => {
     cart.totalAmount = calculateTotal(cart.items);
 
     await cart.save();
-    await cart.populate("items.food");
+    await cart.populate({ path: "items.food", populate: { path: "restaurant", select: "name" } });
 
     res.status(200).json({
       success: true,

@@ -42,6 +42,23 @@ const getCoupons = async (req, res) => {
   }
 };
 
+const getAllCoupons = async (req, res) => {
+  try {
+    const coupons = await Coupon.find().sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: coupons.length,
+      coupons,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // GET COUPON BY CODE
 const getCouponByCode = async (req, res) => {
   try {
@@ -78,7 +95,7 @@ const updateCoupon = async (req, res) => {
       req.params.id,
       req.body,
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       }
     );
@@ -109,7 +126,7 @@ const deleteCoupon = async (req, res) => {
     const coupon = await Coupon.findByIdAndUpdate(
       req.params.id,
       { isActive: false },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     if (!coupon) {
@@ -134,6 +151,7 @@ const deleteCoupon = async (req, res) => {
 module.exports = {
   createCoupon,
   getCoupons,
+  getAllCoupons,
   getCouponByCode,
   updateCoupon,
   deleteCoupon,

@@ -3,6 +3,7 @@ const express = require("express");
 const {
   createCategory,
   getCategories,
+  getAllCategories,
   getCategoryById,
   updateCategory,
   deleteCategory,
@@ -14,6 +15,12 @@ const router = express.Router();
 
 // Public
 router.get("/", getCategories);
+router.get(
+  "/admin/all",
+  protect,
+  authorize("admin"),
+  getAllCategories
+);
 router.get("/:id", getCategoryById);
 
 // Admin

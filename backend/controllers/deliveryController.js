@@ -100,7 +100,7 @@ const assignDeliveryPartner = async (req, res) => {
         status: "assigned",
       },
       {
-        new: true,
+        returnDocument: "after",
       }
     );
 

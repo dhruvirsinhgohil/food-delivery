@@ -8,9 +8,9 @@ function MainLayout() {
     <div className="app-layout">
       <Navbar />
 
-      <main>
+      <div className="main-content">
         <Outlet />
-      </main>
+      </div>
 
       <Footer />
     </div>

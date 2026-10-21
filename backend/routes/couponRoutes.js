@@ -3,6 +3,7 @@ const express = require("express");
 const {
   createCoupon,
   getCoupons,
+  getAllCoupons,
   getCouponByCode,
   updateCoupon,
   deleteCoupon,
@@ -14,6 +15,12 @@ const router = express.Router();
 
 // Public
 router.get("/", getCoupons);
+router.get(
+  "/admin/all",
+  protect,
+  authorize("admin"),
+  getAllCoupons
+);
 router.get("/code/:code", getCouponByCode);
 
 // Admin

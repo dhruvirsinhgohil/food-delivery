@@ -131,7 +131,7 @@ const updateUserStatus = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { isActive },
-      { new: true }
+      { returnDocument: "after" }
     ).select("-password");
 
     if (!user) {
