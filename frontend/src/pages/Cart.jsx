@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useCart } from "../context/useCart";
-import api from "../api/axios";
+import { getImageUrl } from "../utils/imageUrl";
 import "../styles/Cart.css";
 
 function Cart() {
@@ -16,7 +16,6 @@ function Cart() {
     totalItems,
     totalPrice,
   } = useCart();
-  const imageUrl = (image) => !image ? "" : image.startsWith("http") ? image : `${api.defaults.baseURL.replace(/\/api\/?$/, "")}${image.startsWith("/") ? "" : "/"}${image}`;
   const runAction = async (action) => {
     setError("");
     try {
@@ -67,7 +66,7 @@ function Cart() {
                   {item.image ? (
                     <img
                       src={
-                        imageUrl(item.image)
+                        getImageUrl(item.image)
                       }
                       alt={item.name}
                     />

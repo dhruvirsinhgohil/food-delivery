@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import { getImageUrl } from "../utils/imageUrl";
 import { useCart } from "../context/useCart";
 import { useAuth } from "../context/useAuth";
 import "../styles/RestaurantDetails.css";
@@ -128,33 +129,6 @@ function RestaurantDetails() {
 
           return categoryName === activeCategory;
         });
-
- const getImageUrl = (image) => {
-  if (!image || typeof image !== "string") return "";
-
-  const imagePath = image.trim();
-
-  if (!imagePath) return "";
-
-  // Cloudinary or another external image URL
-  if (/^https?:\/\//i.test(imagePath)) {
-    return imagePath;
-  }
-
-  // Get the deployed backend URL from Axios
-  const apiBaseURL = api.defaults.baseURL;
-
-  if (!apiBaseURL) {
-    console.error("API baseURL is not configured");
-    return "";
-  }
-
-  const serverURL = apiBaseURL
-    .replace(/\/api\/?$/, "")
-    .replace(/\/+$/, "");
-
-  return `${serverURL}/${imagePath.replace(/^\/+/, "")}`;
-};
 
   const handleAddToCart = async (food) => {
     setActionMessage("");

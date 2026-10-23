@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { FiHeart, FiSearch, FiShoppingCart, FiStar } from "react-icons/fi";
 import api from "../api/axios";
+import { getImageUrl } from "../utils/imageUrl";
 import { useAuth } from "../context/useAuth";
 import { useCart } from "../context/useCart";
 import "../styles/Commerce.css";
 
-const imageUrl = (image) => !image ? "" : image.startsWith("http") ? image : `${api.defaults.baseURL.replace(/\/api\/?$/, "")}${image.startsWith("/") ? "" : "/"}${image}`;
 const foodsFrom = (data) => data.foods || data.data?.foods || (Array.isArray(data.data) ? data.data : []);
 
 function FoodBrowse() {
@@ -95,7 +95,7 @@ function FoodBrowse() {
     <div className="food-category-chips"><button className={!categoryId ? "active" : ""} type="button" onClick={() => setFilter("category", "")}>All dishes</button>{categories.map((category) => <button className={categoryId === category._id ? "active" : ""} key={category._id} type="button" onClick={() => setFilter("category", category._id)}>{category.name}</button>)}</div>
     {error && <div className="commerce-alert error" role="alert">{error}</div>}{notice && <div className="commerce-alert success" role="status">{notice}</div>}
     {loading ? <div className="commerce-loading"><span className="commerce-spinner" /> Loading delicious food…</div> : visibleFoods.length ? <div className="food-browse-grid">{visibleFoods.map((food) => <article className="browse-food-card" key={food._id}>
-      <div className="browse-food-image">{imageUrl(food.image) ? <img src={imageUrl(food.image)} alt={food.name} loading="lazy" onError={(event) => { event.currentTarget.style.display = "none"; event.currentTarget.parentElement.classList.add("image-failed"); }} /> : <span>🍲</span>}<span className={`browse-food-type ${food.foodType || "veg"}`}>{food.foodType || "veg"}</span><button type="button" className={favorites.includes(food._id) ? "favorite active" : "favorite"} onClick={() => toggleFavorite(food)} aria-label="Toggle wishlist"><FiHeart /></button></div>
+      <div className="browse-food-image">{getImageUrl(food.image) ? <img src={getImageUrl(food.image)} alt={food.name} loading="lazy" onError={(event) => { event.currentTarget.style.display = "none"; event.currentTarget.parentElement.classList.add("image-failed"); }} /> : <span>🍲</span>}<span className={`browse-food-type ${food.foodType || "veg"}`}>{food.foodType || "veg"}</span><button type="button" className={favorites.includes(food._id) ? "favorite active" : "favorite"} onClick={() => toggleFavorite(food)} aria-label="Toggle wishlist"><FiHeart /></button></div>
       <div className="browse-food-copy"><span className="commerce-kicker">{food.restaurant?.name || "LOCAL RESTAURANT"}{food.restaurant?.isOpen === false ? " · CLOSED" : ""}</span><h2>{food.name}</h2><p>{food.description || "Freshly prepared with delicious ingredients."}</p><div className="browse-food-footer"><span className="browse-rating"><FiStar /> {Number(food.rating || 0).toFixed(1)}</span><strong>₹{(Number(food.price || 0) * (1 - Number(food.discount || 0) / 100)).toFixed(2)}</strong><button type="button" disabled={food.isAvailable === false || food.restaurant?.isOpen === false || food.restaurant?.isActive === false} onClick={() => add(food)}><FiShoppingCart />{food.restaurant?.isOpen === false ? "Closed" : "Add"}</button></div></div>
     </article>)}</div> : <section className="commerce-empty"><span>🔎</span><h2>No dishes found</h2><p>Try a different search or remove some filters.</p><button className="commerce-button outline" type="button" onClick={() => setParams({})}>Clear filters</button></section>}
   </main>;

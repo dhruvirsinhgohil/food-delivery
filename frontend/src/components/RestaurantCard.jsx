@@ -1,12 +1,9 @@
 import { Link } from "react-router-dom";
 import { FiClock, FiMapPin, FiArrowRight } from "react-icons/fi";
+import { getImageUrl } from "../utils/imageUrl";
 import "../styles/RestaurantCard.css";
 function RestaurantCard({ restaurant }) {
-  const imageUrl = restaurant.image
-    ? restaurant.image.startsWith("http")
-      ? restaurant.image
-      : `http://localhost:5000${restaurant.image}`
-    : null;
+  const imageUrl = getImageUrl(restaurant.image);
   const address = restaurant.address;
   const location =
     typeof address === "string"

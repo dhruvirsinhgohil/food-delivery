@@ -1,26 +1,24 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const getUploadsDirectory = require("../config/uploads");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    let folder = "uploads/users";
+    let folder = "users";
 
     if (req.baseUrl.includes("food")) {
-      folder = "uploads/foods";
+      folder = "foods";
     }
 
     if (req.baseUrl.includes("restaurant")) {
-      folder = "uploads/restaurants";
+      folder = "restaurants";
     }
 
-    if (!fs.existsSync(folder)) {
-      fs.mkdirSync(folder, {
-        recursive: true,
-      });
-    }
+    const destination = path.join(getUploadsDirectory(), folder);
+    fs.mkdirSync(destination, { recursive: true });
 
-    cb(null, folder);
+    cb(null, destination);
   },
 
   filename: (req, file, cb) => {

@@ -2,7 +2,10 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
+dotenv.config();
+
 const connectDB = require("./config/db");
+const getUploadsDirectory = require("./config/uploads");
 const {
   notFound,
   errorHandler,
@@ -24,8 +27,6 @@ const wishlistRoutes = require("./routes/wishlistRoutes");
 const deliveryRoutes = require("./routes/deliveryRoutes");
 const deliveryPartnerRoutes = require("./routes/deliveryPartnerRoutes");
 
-dotenv.config();
-
 const app = express();
 
 // ===============================
@@ -43,9 +44,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const path = require("path");
 
-// Serve uploaded food and restaurant images
 app.use(
   "/uploads",
+  express.static(getUploadsDirectory()),
   express.static(path.join(__dirname, "uploads"))
 );
 

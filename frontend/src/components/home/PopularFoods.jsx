@@ -11,21 +11,10 @@ import {
 } from "react-icons/fi";
 import Swal from "sweetalert2";
 import api from "../../api/axios";
+import { getImageUrl } from "../../utils/imageUrl";
 import { useCart } from "../../context/useCart";
 import { useAuth } from "../../context/useAuth";
 import "../../styles/PopularFoods.css";
-
-function getImageUrl(image) {
-  if (!image) return "";
-
-  if (image.startsWith("http")) {
-    return image;
-  }
-
-  return `${api.defaults.baseURL.replace(/\/api\/?$/, "")}${
-    image.startsWith("/") ? image : `/${image}`
-  }`;
-}
 
 function PopularFoods() {
   const [foods, setFoods] = useState([]);

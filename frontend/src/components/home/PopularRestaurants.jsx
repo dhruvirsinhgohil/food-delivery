@@ -10,6 +10,7 @@ import {
   FiTruck,
 } from "react-icons/fi";
 import api from "../../api/axios";
+import { getImageUrl } from "../../utils/imageUrl";
 import "../../styles/PopularRestaurants.css";
 
 const cardVariants = {
@@ -20,18 +21,6 @@ const cardVariants = {
     transition: { duration: 0.45, ease: "easeOut" },
   },
 };
-
-function getRestaurantImage(restaurant) {
-  if (!restaurant.image) return "";
-
-  if (restaurant.image.startsWith("http")) {
-    return restaurant.image;
-  }
-
-  return `${api.defaults.baseURL.replace(/\/api\/?$/, "")}${
-    restaurant.image.startsWith("/") ? "" : "/"
-  }${restaurant.image}`;
-}
 
 function RestaurantSkeleton() {
   return (
@@ -160,7 +149,7 @@ function PopularRestaurants() {
             }}
           >
             {restaurants.slice(0, 8).map((restaurant) => {
-              const image = getRestaurantImage(restaurant);
+              const image = getImageUrl(restaurant.image);
               const cuisines = Array.isArray(restaurant.cuisines)
                 ? restaurant.cuisines
                 : [];
